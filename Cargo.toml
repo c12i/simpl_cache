@@ -1,0 +1,5 @@
+[workspace]
+members = [
+    "simple_cache_core",
+    "simple_cache_macros",
+]
