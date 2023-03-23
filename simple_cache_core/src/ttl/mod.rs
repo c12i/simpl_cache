@@ -38,7 +38,6 @@ where
             .lock()
             .unwrap()
             .get(&key)
-            .filter(|(_, instant)| instant.elapsed() <= self.ttl)
             .map(|(value, _)| value.to_owned())
     }
 
