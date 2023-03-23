@@ -19,9 +19,8 @@ where
             map: map.clone(),
             ttl,
         };
-        let thread_values = map.clone();
         std::thread::spawn(move || loop {
-            thread_values
+            map.clone()
                 .lock()
                 .unwrap()
                 .retain(|_, (_, instant)| instant.elapsed() < ttl);
