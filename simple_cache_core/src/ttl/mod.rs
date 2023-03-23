@@ -23,7 +23,7 @@ where
             map.clone()
                 .lock()
                 .unwrap()
-                .retain(|_, (_, instant)| instant.elapsed() < ttl);
+                .retain(|_, (_, instant)| instant.elapsed() < cache.ttl);
         });
         cache
     }
