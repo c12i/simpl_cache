@@ -11,21 +11,22 @@ pub struct TtlCache<K, V> {
 impl<K, V> TtlCache<K, V>
 where
     K: Eq + std::hash::Hash + Send + 'static,
-		V: Clone + Send + 'static,
+    V: Clone + Send + 'static,
 {
     pub fn new(ttl: Duration) -> Self {
-			let map = Arc::new(Mutex::new(HashMap::new()));
-			let cache = TtlCache {
-				map: map.clone(),
-				ttl,
-			};
-			let thread_values = map.clone();
-			std::thread::spawn(move || loop {
-				thread_values.lock().unwrap().retain(|_, (_, instant)| {
-					instant.elapsed() < ttl
-				});
-			});
-			cache
+        let map = Arc::new(Mutex::new(HashMap::new()));
+        let cache = TtlCache {
+            map: map.clone(),
+            ttl,
+        };
+        let thread_values = map.clone();
+        std::thread::spawn(move || loop {
+            thread_values
+                .lock()
+                .unwrap()
+                .retain(|_, (_, instant)| instant.elapsed() < ttl);
+        });
+        cache
     }
 
     pub fn insert(&self, key: K, value: V) {
@@ -35,46 +36,48 @@ where
 
     pub fn get(&self, key: K) -> Option<V> {
         self.map
-						.lock()
-						.unwrap()
+            .lock()
+            .unwrap()
             .get(&key)
             .filter(|(_, instant)| instant.elapsed() <= self.ttl)
             .map(|(value, _)| value.to_owned())
     }
 
     pub fn remove(&self, key: K) -> Option<V> {
-        self.map.lock().unwrap().remove(&key).map(|(value, _)| value)
+        self.map
+            .lock()
+            .unwrap()
+            .remove(&key)
+            .map(|(value, _)| value)
     }
 }
 
-
-
 #[cfg(test)]
 mod test {
-	use super::*;
-	use std::time::Duration;
+    use super::*;
+    use std::time::Duration;
 
-	#[test]
-	fn test_cache_insert() {
-		let cache = TtlCache::new(Duration::from_secs(5));
-		cache.insert("foo", "test");
-		assert_eq!(cache.get("foo"), Some("test"));
-	}
+    #[test]
+    fn test_cache_insert() {
+        let cache = TtlCache::new(Duration::from_secs(5));
+        cache.insert("foo", "test");
+        assert_eq!(cache.get("foo"), Some("test"));
+    }
 
- #[test]
-	fn test_cache_get_expired() {
-		let cache = TtlCache::new(Duration::from_secs(1));
-		cache.insert("foo", "test");
-		std::thread::sleep(Duration::from_secs(2));
-		assert_eq!(cache.get("foo"), None);
-	}
+    #[test]
+    fn test_cache_get_expired() {
+        let cache = TtlCache::new(Duration::from_secs(1));
+        cache.insert("foo", "test");
+        std::thread::sleep(Duration::from_secs(2));
+        assert_eq!(cache.get("foo"), None);
+    }
 
- #[test]
-	fn test_cache_remove() {
-		let cache = TtlCache::new(Duration::from_secs(5));
-		cache.insert("foo", "test");
-		assert_eq!(cache.get("foo"), Some("test"));
-		cache.remove("foo");
-		assert_eq!(cache.get("foo"), None);
-	}
+    #[test]
+    fn test_cache_remove() {
+        let cache = TtlCache::new(Duration::from_secs(5));
+        cache.insert("foo", "test");
+        assert_eq!(cache.get("foo"), Some("test"));
+        cache.remove("foo");
+        assert_eq!(cache.get("foo"), None);
+    }
 }
