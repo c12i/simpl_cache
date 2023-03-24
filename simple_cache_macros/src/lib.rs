@@ -38,9 +38,6 @@ pub fn ttl_cache(attr: TokenStream, item: TokenStream) -> TokenStream {
                 None
             }
         })
-        .map(|i| {
-            quote! { #i }
-        })
         .collect::<Vec<_>>();
 
     // Generate the wrapped function
@@ -52,7 +49,6 @@ pub fn ttl_cache(attr: TokenStream, item: TokenStream) -> TokenStream {
                 return cached_result;
             }
             fn #cached_function(#function_args) -> #function_return_type #function_body
-            
             let result = #cached_function(#(#function_args_names),*);
             cache.insert(key, result.clone());
             result
