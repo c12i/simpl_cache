@@ -22,8 +22,6 @@ pub fn ttl_cache(attr: TokenStream, item: TokenStream) -> TokenStream {
     };
     let ttl = parse_macro_input!(attr as LitInt);
     let ttl = ttl.base10_parse::<u64>().expect("Invalid ttl argument");
-    let ttl_duration = quote! { std::time::Duration::from_secs(#ttl) };
-
     // Extract variable names from function arguments
     let function_args_names = function_args
         .iter()
@@ -39,18 +37,19 @@ pub fn ttl_cache(attr: TokenStream, item: TokenStream) -> TokenStream {
             }
         })
         .collect::<Vec<_>>();
-
     // Generate the wrapped function
     let output = quote! {
+        static CACHE: ::once_cell::sync::Lazy<::simple_cache_core::TtlCache<&str, #function_return_type>> = ::once_cell::sync::Lazy::new(
+            || ::simple_cache_core::TtlCache::new(std::time::Duration::from_secs(#ttl))
+        );
         pub fn #function_name(#function_args) -> #function_return_type {
-            let cache = ::simple_cache_core::TtlCache::new(#ttl_duration);
             let key = #key;
-            if let Some(cached_result) = cache.get(key) {
+            if let Some(cached_result) = CACHE.get(key) {
                 return cached_result;
             }
             fn #cached_function(#function_args) -> #function_return_type #function_body
             let result = #cached_function(#(#function_args_names),*);
-            cache.insert(key, result.clone());
+            CACHE.insert(key, result.clone());
             result
         }
     };
