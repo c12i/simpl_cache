@@ -7,7 +7,7 @@ use syn::{parse_macro_input, ItemFn, LitInt, ReturnType};
 
 #[proc_macro_attribute]
 pub fn ttl_cache(attr: TokenStream, item: TokenStream) -> TokenStream {
-    // Parse the function signature and extract the return type
+    // Parse the anotated function signature and extract various properties
     let function = parse_macro_input!(item as ItemFn);
     let function_name = &function.sig.ident;
     let function_args = &function.sig.inputs;
