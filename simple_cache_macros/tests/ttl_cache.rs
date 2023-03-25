@@ -1,5 +1,5 @@
-use std::time::{Duration, Instant};
 use std::thread::sleep;
+use std::time::{Duration, Instant};
 
 use simple_cache_macros::ttl_cache;
 

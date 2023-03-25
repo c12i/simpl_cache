@@ -3,7 +3,10 @@ extern crate proc_macro;
 use proc_macro::TokenStream;
 use proc_macro2::{Ident, Span};
 use quote::quote;
-use syn::{parse_macro_input, ItemFn, LitInt, ReturnType};
+use syn::{
+    parse_macro_input, punctuated::Punctuated, token::Comma, FnArg, ItemFn, LitInt, PatIdent,
+    ReturnType, Type,
+};
 
 #[proc_macro_attribute]
 pub fn ttl_cache(attr: TokenStream, item: TokenStream) -> TokenStream {
@@ -16,43 +19,13 @@ pub fn ttl_cache(attr: TokenStream, item: TokenStream) -> TokenStream {
     let key = function_name.to_string();
     let cached_function = Ident::new(&format!("_{}", &key), Span::call_site());
     let static_var = Ident::new(&key.to_ascii_uppercase(), Span::call_site());
-    let function_return_type = match &function.sig.output {
-        ReturnType::Type(_, ty) => ty.as_ref(),
-        ReturnType::Default => {
-            panic!("`ttl_cache` can only be applied to functions that return a value")
-        }
-    };
+    let function_return_type = get_function_return_type(&function.sig.output);
     let ttl = parse_macro_input!(attr as LitInt);
     let ttl = ttl.base10_parse::<u64>().expect("Invalid ttl argument");
     // Extract variable names from function arguments
-    let function_args_names = function_args
-        .iter()
-        .filter_map(|arg| {
-            if let syn::FnArg::Typed(pat_type) = arg {
-                if let syn::Pat::Ident(arg_name) = &*pat_type.pat {
-                    Some(arg_name.ident.clone())
-                } else {
-                    None
-                }
-            } else {
-                None
-            }
-        })
-        .collect::<Vec<_>>();
-    let function_arg_values = function_args
-        .iter()
-        .filter_map(|arg| {
-            if let syn::FnArg::Typed(pat_type) = arg {
-                if let syn::Pat::Ident(arg_ident) = &*pat_type.pat {
-                    Some(quote! { #arg_ident })
-                } else {
-                    None
-                }
-            } else {
-                None
-            }
-        })
-        .collect::<Vec<_>>();
+    let (function_args_names, function_arg_values) = get_function_args(function_args, |ident| {
+        quote! { #ident }
+    });
     // Generate the key from function name and arg values as token stream
     let key = quote! {
         format!("{}:{:?}", #key, (#(#function_arg_values),*))
@@ -73,4 +46,57 @@ pub fn ttl_cache(attr: TokenStream, item: TokenStream) -> TokenStream {
         }
     };
     output.into()
+}
+
+fn get_function_return_type(output: &ReturnType) -> &Type {
+    match output {
+        ReturnType::Type(_, ty) => {
+            if let syn::Type::Tuple(ty) = &**ty {
+                panic!("`ttl_cache` can only be applied to functions that return a value");
+            }
+            ty.as_ref()
+        }
+        ReturnType::Default => {
+            panic!("`ttl_cache` can only be applied to functions that return a value")
+        }
+    }
+}
+
+fn get_function_args<T>(
+    args: &Punctuated<FnArg, Comma>,
+    value_generator: T,
+) -> (Vec<Ident>, Vec<proc_macro2::TokenStream>)
+where
+    T: Fn(&PatIdent) -> proc_macro2::TokenStream,
+{
+    let names = args
+        .iter()
+        .filter_map(|arg| {
+            if let syn::FnArg::Typed(pat_type) = arg {
+                if let syn::Pat::Ident(arg_name) = &*pat_type.pat {
+                    Some(arg_name.ident.clone())
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        })
+        .collect::<Vec<_>>();
+    let values = args
+        .iter()
+        .filter_map(|arg| {
+            if let syn::FnArg::Typed(pat_type) = arg {
+                if let syn::Pat::Ident(arg_ident) = &*pat_type.pat {
+                    Some(value_generator(arg_ident))
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        })
+        .collect::<Vec<_>>();
+
+    (names, values)
 }
