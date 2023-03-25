@@ -49,7 +49,11 @@ fn get_function_return_type(output: &ReturnType) -> &Type {
     match output {
         ReturnType::Type(_, ty) => {
             if let syn::Type::Tuple(ty) = &**ty {
-                panic!("`ttl_cache` can only be applied to functions that return a value");
+                // prevent #[ttl_cache] from getting applied to functions that explicitly
+                // return a unit type: `()`
+                if ty.elems.len() == 0 {
+                    panic!("`ttl_cache` can only be applied to functions that return a value");
+                }
             }
             ty.as_ref()
         }
