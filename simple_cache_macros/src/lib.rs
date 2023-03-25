@@ -3,10 +3,9 @@ extern crate proc_macro;
 use proc_macro::TokenStream;
 use proc_macro2::{Ident, Span};
 use quote::quote;
-use syn::{
-    parse_macro_input, punctuated::Punctuated, token::Comma, FnArg, ItemFn, LitInt, PatIdent,
-    ReturnType, Type,
-};
+use syn::punctuated::Punctuated;
+use syn::token::Comma;
+use syn::{parse_macro_input, FnArg, ItemFn, LitInt, ReturnType, Type};
 
 #[proc_macro_attribute]
 pub fn ttl_cache(attr: TokenStream, item: TokenStream) -> TokenStream {
@@ -60,7 +59,9 @@ fn get_function_return_type(output: &ReturnType) -> &Type {
     }
 }
 
-fn get_function_args(args: &Punctuated<FnArg, Comma>) -> (Vec<Ident>, Vec<proc_macro2::TokenStream>){
+fn get_function_args(
+    args: &Punctuated<FnArg, Comma>,
+) -> (Vec<Ident>, Vec<proc_macro2::TokenStream>) {
     let names = args
         .iter()
         .filter_map(|arg| {
