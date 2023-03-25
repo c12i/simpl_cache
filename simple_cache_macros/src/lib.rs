@@ -12,8 +12,10 @@ pub fn ttl_cache(attr: TokenStream, item: TokenStream) -> TokenStream {
     let function_name = &function.sig.ident;
     let function_args = &function.sig.inputs;
     let function_body = &function.block;
+    let function_visibitly = &function.vis;
     let key = function_name.to_string();
     let cached_function = Ident::new(&format!("_{}", &key), Span::call_site());
+    let static_var = Ident::new(&key.to_ascii_uppercase(), Span::call_site());
     let function_return_type = match &function.sig.output {
         ReturnType::Type(_, ty) => ty.as_ref(),
         ReturnType::Default => {
@@ -57,16 +59,16 @@ pub fn ttl_cache(attr: TokenStream, item: TokenStream) -> TokenStream {
     };
     // Generate function
     let output = quote! {
-        static CACHE: ::once_cell::sync::Lazy<::simple_cache_core::TtlCache<String, #function_return_type>> = ::once_cell::sync::Lazy::new(
+        static #static_var: ::once_cell::sync::Lazy<::simple_cache_core::TtlCache<String, #function_return_type>> = ::once_cell::sync::Lazy::new(
             || ::simple_cache_core::TtlCache::new(std::time::Duration::from_secs(#ttl))
         );
-        pub fn #function_name(#function_args) -> #function_return_type {
-            if let Some(cached_result) = CACHE.get(#key) {
+        #function_visibitly fn #function_name(#function_args) -> #function_return_type {
+            if let Some(cached_result) = #static_var.get(#key) {
                 return cached_result;
             }
             fn #cached_function(#function_args) -> #function_return_type #function_body
             let result = #cached_function(#(#function_args_names),*);
-            CACHE.insert(#key, result.clone());
+            #static_var.insert(#key, result.clone());
             result
         }
     };
