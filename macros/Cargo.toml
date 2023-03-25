@@ -10,5 +10,5 @@ proc-macro = true
 quote = "*"
 proc-macro2="*"
 syn = {version="*", features=["extra-traits", "full"]}
-simple_cache_core={path="../simple_cache_core"}
+simple_cache_core={path="../core"}
 once_cell = "1.17.1"
