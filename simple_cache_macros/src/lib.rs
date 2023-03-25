@@ -23,9 +23,7 @@ pub fn ttl_cache(attr: TokenStream, item: TokenStream) -> TokenStream {
     let ttl = parse_macro_input!(attr as LitInt);
     let ttl = ttl.base10_parse::<u64>().expect("Invalid ttl argument");
     // Extract variable names from function arguments
-    let (function_args_names, function_arg_values) = get_function_args(function_args, |ident| {
-        quote! { #ident }
-    });
+    let (function_args_names, function_arg_values) = get_function_args(function_args);
     // Generate the key from function name and arg values as token stream
     let key = quote! {
         format!("{}:{:?}", #key, (#(#function_arg_values),*))
@@ -62,13 +60,7 @@ fn get_function_return_type(output: &ReturnType) -> &Type {
     }
 }
 
-fn get_function_args<T>(
-    args: &Punctuated<FnArg, Comma>,
-    value_generator: T,
-) -> (Vec<Ident>, Vec<proc_macro2::TokenStream>)
-where
-    T: Fn(&PatIdent) -> proc_macro2::TokenStream,
-{
+fn get_function_args(args: &Punctuated<FnArg, Comma>) -> (Vec<Ident>, Vec<proc_macro2::TokenStream>){
     let names = args
         .iter()
         .filter_map(|arg| {
@@ -88,7 +80,7 @@ where
         .filter_map(|arg| {
             if let syn::FnArg::Typed(pat_type) = arg {
                 if let syn::Pat::Ident(arg_ident) = &*pat_type.pat {
-                    Some(value_generator(arg_ident))
+                    Some(quote! { #arg_ident })
                 } else {
                     None
                 }
