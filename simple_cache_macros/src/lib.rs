@@ -37,19 +37,36 @@ pub fn ttl_cache(attr: TokenStream, item: TokenStream) -> TokenStream {
             }
         })
         .collect::<Vec<_>>();
-    // Generate the wrapped function
+    let function_arg_values = function_args
+        .iter()
+        .filter_map(|arg| {
+            if let syn::FnArg::Typed(pat_type) = arg {
+                if let syn::Pat::Ident(arg_ident) = &*pat_type.pat {
+                    Some(quote! { #arg_ident })
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        })
+        .collect::<Vec<_>>();
+    // Generate the key from function name and arg values as token stream
+    let key = quote! {
+        format!("{}:{:?}", #key, (#(#function_arg_values),*))
+    };
+    // Generate function
     let output = quote! {
-        static CACHE: ::once_cell::sync::Lazy<::simple_cache_core::TtlCache<&str, #function_return_type>> = ::once_cell::sync::Lazy::new(
+        static CACHE: ::once_cell::sync::Lazy<::simple_cache_core::TtlCache<String, #function_return_type>> = ::once_cell::sync::Lazy::new(
             || ::simple_cache_core::TtlCache::new(std::time::Duration::from_secs(#ttl))
         );
         pub fn #function_name(#function_args) -> #function_return_type {
-            let key = #key;
-            if let Some(cached_result) = CACHE.get(key) {
+            if let Some(cached_result) = CACHE.get(#key) {
                 return cached_result;
             }
             fn #cached_function(#function_args) -> #function_return_type #function_body
             let result = #cached_function(#(#function_args_names),*);
-            CACHE.insert(key, result.clone());
+            CACHE.insert(#key, result.clone());
             result
         }
     };
