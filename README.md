@@ -40,3 +40,5 @@ fn print_hello_world() {
     println!("Hello, world!");
 }
 ```
+
+Additionally, the type returned by the annotated function must implement `Clone`

@@ -27,11 +27,14 @@ pub fn ttl_cache(attr: TokenStream, item: TokenStream) -> TokenStream {
     // Extract variable names from function arguments
     let (function_args_names, function_arg_values) = get_function_args(function_args);
     // Generate the key from function name and arg values as token stream
+    // TODO: This can be improved
     let key = quote! {
         format!("{}:{:?}", #key, (#(#function_arg_values),*))
     };
-    // Generate function
+    // Generate function and ttl cache static variable
     let output = quote! {
+        // Each ttl cache annotated function will have its own static variable containing
+        // an instance of the TtlCache struct, which holds the cached values
         static #static_var: ::once_cell::sync::Lazy<::simple_cache_core::TtlCache<String, #function_return_type>> = ::once_cell::sync::Lazy::new(
             || ::simple_cache_core::TtlCache::new(std::time::Duration::from_secs(#ttl))
         );
