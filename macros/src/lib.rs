@@ -21,9 +21,7 @@ pub fn ttl_cache(attr: TokenStream, item: TokenStream) -> TokenStream {
     let internal_function = Ident::new(&format!("__{}", &key), Span::call_site());
 
     let static_var = Ident::new(&key.to_ascii_uppercase(), internal_function.span());
-    let ttl = parse_macro_input!(attr as LitInt)
-        .base10_parse::<u64>()
-        .expect("Invalid ttl argument");
+    let ttl = parse_macro_input!(attr as LitInt);
 
     // Extract variable names from function arguments
     let (function_args_names, function_arg_values) = get_function_args(function_args);
