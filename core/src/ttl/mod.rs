@@ -48,6 +48,14 @@ where
             .remove(&key)
             .map(|(value, _)| value)
     }
+
+    pub fn clear(&self) {
+        self.map.lock().unwrap().clear();
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.map.lock().unwrap().is_empty()
+    }
 }
 
 #[cfg(test)]
@@ -77,5 +85,15 @@ mod test {
         assert_eq!(cache.get("foo"), Some("test"));
         cache.remove("foo");
         assert_eq!(cache.get("foo"), None);
+    }
+
+    #[test]
+    fn test_cache_clear() {
+        let cache = TtlCache::new(Duration::from_secs(5));
+        assert!(cache.is_empty());
+        cache.insert("foo", "test");
+        assert_eq!(cache.get("foo"), Some("test"));
+        cache.clear();
+        assert!(cache.is_empty());
     }
 }
