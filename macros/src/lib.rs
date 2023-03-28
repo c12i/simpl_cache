@@ -1,5 +1,3 @@
-extern crate proc_macro;
-
 use proc_macro::TokenStream;
 use proc_macro2::Span;
 use quote::quote;
@@ -17,13 +15,16 @@ pub fn ttl_cache(attr: TokenStream, item: TokenStream) -> TokenStream {
     let function_args = &function.sig.inputs;
     let function_body = &function.block;
     let function_visibitly = &function.vis;
-    let key = function_name.to_string();
-    let cached_function = Ident::new(&format!("__{}", &key), Span::call_site());
-    let static_var = Ident::new(&key.to_ascii_uppercase(), Span::call_site());
     let function_return_type = get_function_return_type(&function.sig.output);
+
+    let key = function_name.to_string();
+    let internal_function = Ident::new(&format!("__{}", &key), Span::call_site());
+
+    let static_var = Ident::new(&key.to_ascii_uppercase(), internal_function.span());
     let ttl = parse_macro_input!(attr as LitInt)
         .base10_parse::<u64>()
         .expect("Invalid ttl argument");
+
     // Extract variable names from function arguments
     let (function_args_names, function_arg_values) = get_function_args(function_args);
     // Generate the key from function name and arg values as token stream
@@ -31,19 +32,23 @@ pub fn ttl_cache(attr: TokenStream, item: TokenStream) -> TokenStream {
     let key = quote! {
         format!("{}:{:?}", #key, (#(#function_arg_values),*))
     };
+
     // Generate function and ttl cache static variable
     let output = quote! {
         // Each ttl cache annotated function will have its own static variable containing
         // an instance of the TtlCache struct, which holds the cached values
         static #static_var: ::once_cell::sync::Lazy<::simple_cache_core::TtlCache<String, #function_return_type>> = ::once_cell::sync::Lazy::new(
-            || ::simple_cache_core::TtlCache::new(std::time::Duration::from_secs(#ttl))
+            || ::simple_cache_core::TtlCache::new(::std::time::Duration::from_secs(#ttl))
         );
+
         #function_visibitly fn #function_name(#function_args) -> #function_return_type {
             if let Some(cached_result) = #static_var.get(#key) {
                 return cached_result;
             }
-            fn #cached_function(#function_args) -> #function_return_type #function_body
-            let result = #cached_function(#(#function_args_names),*);
+            fn #internal_function(#function_args) -> #function_return_type {
+                #function_body
+            }
+            let result = #internal_function(#(#function_args_names),*);
             #static_var.insert(#key, result.clone());
             result
         }
