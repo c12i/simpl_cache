@@ -31,20 +31,24 @@ fn test_ttl_cache_on_function_with_changing_params() {
     assert!(start_time.elapsed().as_secs() >= 10);
 }
 
-#[ttl_cache(5)]
-fn expensive_function_with_shortlived_cache() -> Option<bool> {
-    sleep(Duration::from_secs(5));
-    None
+struct Example;
+
+impl Example {
+    #[ttl_cache(5)]
+    pub fn expensive_function_with_shortlived_cache() -> Option<bool> {
+        sleep(Duration::from_secs(5));
+        None
+    }
 }
 
 #[test]
 fn test_ttl_cache_expiration() {
     let start_time = Instant::now();
-    let _ = expensive_function_with_shortlived_cache();
-    let _ = expensive_function_with_shortlived_cache();
+    let _ = Example::expensive_function_with_shortlived_cache();
+    let _ = Example::expensive_function_with_shortlived_cache();
     assert!(start_time.elapsed().as_secs() <= 5);
     sleep(Duration::from_secs(6));
     let start_time = Instant::now();
-    let _ = expensive_function_with_shortlived_cache();
+    let _ = Example::expensive_function_with_shortlived_cache();
     assert_eq!(start_time.elapsed().as_secs(), 5);
 }

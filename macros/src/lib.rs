@@ -33,22 +33,27 @@ pub fn ttl_cache(attr: TokenStream, item: TokenStream) -> TokenStream {
 
     // Generate function and ttl cache static variable
     let output = quote! {
-        // Each ttl cache annotated function will have its own static variable containing
-        // an instance of the TtlCache struct, which holds the cached values
-        static #static_var: ::once_cell::sync::Lazy<::simple_cache_core::TtlCache<String, #function_return_type>> = ::once_cell::sync::Lazy::new(
-            || ::simple_cache_core::TtlCache::new(::std::time::Duration::from_secs(#ttl))
-        );
-
         #function_visibitly fn #function_name(#function_args) -> #function_return_type {
-            if let Some(cached_result) = #static_var.get(#key) {
-                return cached_result;
+            // Each ttl cache annotated function will have its own static variable containing
+            // an instance of the TtlCache struct, which holds the cached values
+            thread_local! {
+                static #static_var: ::std::cell::RefCell<::simple_cache_core::TtlCache<String, #function_return_type>> = ::std::cell::RefCell::new(
+                    ::simple_cache_core::TtlCache::new(::std::time::Duration::from_secs(#ttl))
+                );
             }
-            fn #internal_function(#function_args) -> #function_return_type {
-                #function_body
-            }
-            let result = #internal_function(#(#function_args_names),*);
-            #static_var.insert(#key, result.clone());
-            result
+            #static_var.with(|var| {
+                let cache = var.borrow_mut();
+                if let Some(cached_result) = cache.get(#key) {
+                    return cached_result;
+                } else {
+                    fn #internal_function(#function_args) -> #function_return_type {
+                        #function_body
+                    }
+                    let result = #internal_function(#(#function_args_names),*);
+                    cache.insert(#key, result.clone());
+                    return result;
+                }
+            })          
         }
     };
     output.into()
