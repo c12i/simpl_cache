@@ -25,6 +25,7 @@ fn test_ttl_cache_on_function_with_changing_params() {
     let start_time = Instant::now();
     let _ = expensive_build_string("foo");
     let _ = expensive_build_string("foo");
+    let _ = expensive_build_string("foo");
     assert!(start_time.elapsed().as_secs() <= 5);
     let _ = expensive_build_string("bar");
     let _ = expensive_build_string("bar");
