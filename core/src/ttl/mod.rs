@@ -24,6 +24,7 @@ where
                 .lock()
                 .unwrap()
                 .retain(|_, (_, instant)| instant.elapsed() < cache.ttl);
+            std::thread::sleep(Duration::from_secs(1));
         });
         cache
     }
