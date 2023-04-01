@@ -1,6 +1,14 @@
 # simple_cache (WIP)
 
-## `#[ttl_cache]`
+## Usage
+Add this to your `Cargo.toml`:
+
+```toml
+[dependencies]
+simple_cache = { git = "https://github.com/collinsmuriuki/simple_cache" }
+```
+
+## `ttl_cache` macro
 
 This proc macro is designed to cache function calls with a time-to-live (TTL) duration. 
 It is useful when working with functions that perform expensive computations and have
