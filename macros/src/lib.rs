@@ -53,7 +53,7 @@ pub fn ttl_cache(attr: TokenStream, item: TokenStream) -> TokenStream {
                     cache.insert(#key, result.clone());
                     return result;
                 }
-            })          
+            })
         }
     };
     output.into()
