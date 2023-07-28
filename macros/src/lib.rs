@@ -65,7 +65,7 @@ fn get_function_return_type(output: &ReturnType) -> &Type {
             if let Type::Tuple(ty) = &**ty {
                 // prevent #[ttl_cache] from getting applied to functions that explicitly
                 // return a unit type: `()`
-                if ty.elems.len() == 0 {
+                if ty.elems.is_empty() {
                     panic!("`ttl_cache` can only be applied to functions that return a value");
                 }
             }
