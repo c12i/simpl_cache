@@ -1,6 +1,6 @@
 [package]
 authors = ["Collins Muriuki <hello@collinsmuriuki.xyz>"]
-name = "simple_cache"
+name = "simple_cache_rs"
 description = "Simple rust caching tools"
 keywords = ["caching"]
 license = "MIT"
