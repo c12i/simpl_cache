@@ -6,7 +6,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-simple_cache = { git = "https://github.com/collinsmuriuki/simple_cache" }
+simple_cache_rs = { version = "1.0.0-beta" }
 ```
 
 ## `ttl_cache` macro
