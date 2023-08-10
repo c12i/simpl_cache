@@ -9,10 +9,40 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  publish_to_crate_io:
-
+  publish_core_lib_to_crate_io:
     runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions-rs/toolchain@v1
+      with:
+          toolchain: stable
+          override: true
+    - name: Publish to crates.io
+      # TOO: improve this
+      run: |
+        cargo login ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        cd core
+        cargo doc
+        cargo publish
+    
+  publish_macros_to_crate_io:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions-rs/toolchain@v1
+      with:
+          toolchain: stable
+          override: true
+    - name: Publish to crates.io
+      # TOO: improve this
+      run: |
+        cargo login ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        cd macros
+        cargo doc
+        cargo publish
 
+  publish_lib_to_crate_io:
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - uses: actions-rs/toolchain@v1
@@ -21,8 +51,8 @@ jobs:
           override: true
     - name: Publish to crates.io
       run: |
-        cargo doc
         cargo login ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        cargo doc
         cargo publish
   
   sync_docs_to_gh_pages:
