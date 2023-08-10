@@ -1,10 +1,19 @@
 [package]
 name = "simple_cache"
+version ="1.0.0-beta"
+
+[workspace.package]
 version = "1.0.0-beta"
+authors = ["Collins Muriuki <hello@collinsmuriuki.xyz>"]
+description = "Simple rust caching tools"
 edition = "2021"
+keywords = ["caching"]
+repository = "https://github.com/collinsmuriuki/simple_cache"
+readme = "./README.md"
+license = "MIT"
 
 [dependencies]
-simple_cache_macros = {version="1.0.0-beta", path = "./macros"}
+simple_cache_macros = {path = "./macros"}
 
 [workspace]
 members = [
