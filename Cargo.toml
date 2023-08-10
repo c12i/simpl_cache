@@ -13,7 +13,7 @@ readme = "./README.md"
 license = "MIT"
 
 [dependencies]
-simple_cache_macros = {path = "./macros"}
+simple_cache_macros = {version="1.0.0-beta", path = "./macros"}
 
 [workspace]
 members = [
