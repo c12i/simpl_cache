@@ -1,4 +1,5 @@
-# simple_cache (WIP)
+# simple_cache
+Simple rust caching tools
 
 ## Usage
 Add this to your `Cargo.toml`:
