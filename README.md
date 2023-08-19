@@ -23,7 +23,7 @@ If the cached value has expired or the function is called with different argumen
 the function will be recomputed and the cache will be updated with the new value.
 
 
-```rs
+```rust,ignore
 #[ttl_cache(30)]
 fn fibonacci(n: u32) -> u32 {
     if n < 2 {
@@ -43,7 +43,7 @@ fn main() {
 The macro will not allow you to apply it to a function that does not return or explicitly 
 returns a unit type `()`. For example, the following will not compile:
 
-```rs
+```rust,ignore
 #[ttl_cache(60)]
 fn print_hello_world() {
     println!("Hello, world!");
