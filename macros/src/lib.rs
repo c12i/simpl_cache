@@ -131,7 +131,7 @@ pub fn ttl_cache(attr: TokenStream, item: TokenStream) -> TokenStream {
     output.into()
 }
 
-fn get_function_return_type<'a>(output: &'a ReturnType) -> FunctionReturnType<'a> {
+fn get_function_return_type(output: &ReturnType) -> FunctionReturnType {
     match output {
         ReturnType::Type(_, ty) => {
             let mut is_option = false;
