@@ -7,7 +7,7 @@ keywords.workspace = true
 repository.workspace = true
 readme.workspace = true
 license.workspace = true
-version.workspace = true
+version = "1.0.0-beta"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
