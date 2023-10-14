@@ -3,10 +3,20 @@ use std::time::{Duration, Instant};
 
 use simple_cache_macros::ttl_cache;
 
-#[ttl_cache(100)]
+#[ttl_cache(duration_s = 100)]
 fn expensive_build_string(s: &str) -> String {
     sleep(Duration::from_secs(5));
     String::from(s)
+}
+
+#[ttl_cache(duration_s = 120, only_ok = true)]
+fn expensive_fallible_build_string(s: &str) -> Result<String, String> {
+    Ok(String::from(s))
+}
+
+#[ttl_cache(duration_s = 120, only_some = true)]
+fn expensive_optional_build_string(_s: &str) -> Option<String> {
+    None
 }
 
 #[test]
@@ -35,7 +45,7 @@ fn test_ttl_cache_on_function_with_changing_params() {
 struct Example;
 
 impl Example {
-    #[ttl_cache(5)]
+    #[ttl_cache(duration_s = 5)]
     pub fn expensive_function_with_shortlived_cache() -> Option<bool> {
         sleep(Duration::from_secs(5));
         None

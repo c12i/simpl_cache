@@ -24,7 +24,7 @@ the function will be recomputed and the cache will be updated with the new value
 
 
 ```rust,ignore
-#[ttl_cache(30)]
+#[ttl_cache(duration_s = 30)]
 fn fibonacci(n: u32) -> u32 {
     if n < 2 {
         return n;
@@ -40,14 +40,65 @@ fn main() {
 }
 ```
 
-The macro will not allow you to apply it to a function that does not return or explicitly 
+You can also cache the `Ok(T)` variant of a function returning a `Result<T, E>`:
+
+```rust,ignore
+// only_ok option ensures that only .is_ok values from the returning Result are cached
+#[ttl_cache(duration_s = 30, only_ok = true)] 
+fn some_fallible_function(n: u32) -> Result<u32, String> {
+    if n == 0 {
+        return Err(String::from("zeros are not allowed"))
+    }
+    Ok(n)
+}
+
+fn main() {
+     // zero is not cached since function returns an Err since n == 0
+    println!("last: {}", some_fallible_function(0));
+    // cache miss: 10 is cached since the result is_ok
+    println!("last: {}", some_fallible_function(10));
+    // cache hit: 10 is retrieved from the cache
+    println!("last: {}", some_fallible_function(10));
+
+}
+```
+
+Similarly you can also chose to only cache `Some(T)` variants from a function returning an `Option<T>`
+
+```rust,ignore
+// only_some option ensures that only .is_some values from the returning Option are cached
+#[ttl_cache(duration_s = 30, only_some = true)] 
+fn some_optional_function(n: u32) -> Option<u32> {
+    if n == 0 {
+        return None;
+    }
+    Some(n)
+}
+
+fn main() {
+     // zero is not cached since function returns None since n == 0
+    println!("last: {}", some_optional_function(0));
+    // cache miss: 10 is cached since the result is_some
+    println!("last: {}", some_optional_function(10));
+    // cache hit: 10 is retrieved from the cache
+    println!("last: {}", some_optional_function(10));
+
+}
+```
+
+## Notes
+
+Note that `only_some` and `only_ok` can only be used when the annotated function returns an
+`Option<T>` or `Result<T, E>` respectively. You can also not set both `only_some` and `only_ok`
+
+The macro will also not allow you to apply it to a function that does not return or explicitly 
 returns a unit type `()`. For example, the following will not compile:
 
 ```rust,ignore
-#[ttl_cache(60)]
+#[ttl_cache(duration_s = 60)]
 fn print_hello_world() {
     println!("Hello, world!");
 }
 ```
 
-Additionally, the type returned by the annotated function must implement `Clone`
+Finally, the type returned by the annotated function must implement `Clone`
