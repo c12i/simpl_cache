@@ -1,4 +1,4 @@
-# simple_cache
+# simpl_cache
 Simple rust caching tools
 
 ## Usage
@@ -24,6 +24,8 @@ the function will be recomputed and the cache will be updated with the new value
 
 
 ```rust,ignore
+use simpl_cache::ttl_cache;
+
 #[ttl_cache(duration_s = 30)]
 fn fibonacci(n: u32) -> u32 {
     if n < 2 {
@@ -43,6 +45,8 @@ fn main() {
 You can also cache the `Ok(T)` variant of a function returning a `Result<T, E>`:
 
 ```rust,ignore
+use simpl_cache::ttl_cache;
+
 // only_ok option ensures that only .is_ok values from the returning Result are cached
 #[ttl_cache(duration_s = 30, only_ok = true)] 
 fn some_fallible_function(n: u32) -> Result<u32, String> {
@@ -66,6 +70,8 @@ fn main() {
 Similarly you can also chose to only cache `Some(T)` variants from a function returning an `Option<T>`
 
 ```rust,ignore
+use simpl_cache::ttl_cache;
+
 // only_some option ensures that only .is_some values from the returning Option are cached
 #[ttl_cache(duration_s = 30, only_some = true)] 
 fn some_optional_function(n: u32) -> Option<u32> {
@@ -95,6 +101,8 @@ The macro will also not allow you to apply it to a function that does not return
 returns a unit type `()`. For example, the following will not compile:
 
 ```rust,ignore
+use simpl_cache::ttl_cache;
+
 #[ttl_cache(duration_s = 60)]
 fn print_hello_world() {
     println!("Hello, world!");
