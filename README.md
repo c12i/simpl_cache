@@ -6,7 +6,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-simpl_cache = { version = "2.1.0-beta" }
+simpl_cache = version = "2.1.0-beta"
 ```
 
 ## `ttl_cache` macro
