@@ -16,7 +16,7 @@ It is useful when working with functions that perform expensive computations and
 outputs that don't change frequently.
 
 The macro generates a static variable for the cache that is shared across all calls to 
-the function with the same name and input arguments. 
+the function with the same name and input arguments.
 
 If a cached value is available, it is returned instead of recomputing the result. 
 If the cached value has expired or the function is called with different arguments,
@@ -95,7 +95,7 @@ fn main() {
 ## Notes
 Firstly, this is still a work in progress, so I would not advise using this in a production setting.
 
-The macro is not stable for use with struct and enum methods, specifically those with `self` as an arg.
+⚠️ The macro is not stable for use with struct and enum methods, specifically those with `self` as an arg. ⚠️
 
 Note that `only_some` and `only_ok` can only be used when the annotated function returns an
 `Option<T>` or `Result<T, E>` respectively. You can also not set both `only_some` and `only_ok`
