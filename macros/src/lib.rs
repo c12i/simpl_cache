@@ -121,8 +121,8 @@ pub fn ttl_cache(attr: TokenStream, item: TokenStream) -> TokenStream {
             // Each ttl cache annotated function will have its own static variable containing
             // an instance of the TtlCache struct, which holds the cached values
             thread_local! {
-                static #static_var: ::std::cell::RefCell<::simple_cache_core::TtlCache<String, #function_return_type>> = ::std::cell::RefCell::new(
-                    ::simple_cache_core::TtlCache::new(::std::time::Duration::from_secs(#duration_s))
+                static #static_var: ::std::cell::RefCell<simple_cache_core::TtlCache<String, #function_return_type>> = ::std::cell::RefCell::new(
+                    simple_cache_core::TtlCache::new(::std::time::Duration::from_secs(#duration_s))
                 );
             }
             #async_keyword fn #internal_function(#function_args) -> #function_return_type {
