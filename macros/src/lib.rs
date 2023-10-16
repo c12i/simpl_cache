@@ -37,7 +37,6 @@ pub fn ttl_cache(attr: TokenStream, item: TokenStream) -> TokenStream {
     } else {
         quote! {}
     };
-
     let key = function_name.to_string();
     let internal_function = Ident::new(&format!("__{}", &key), Span::call_site());
 
