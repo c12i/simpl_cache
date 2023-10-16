@@ -5,7 +5,8 @@ description = "Simple rust caching tools"
 keywords = ["caching"]
 license = "MIT"
 readme = "./README.md"
-version ="2.1.1-beta"
+version ="2.2.0-beta"
+edition = "2021"
 
 [workspace.package]
 authors = ["Collins Muriuki <hello@collinsmuriuki.xyz>"]
@@ -19,6 +20,7 @@ license = "MIT"
 [dependencies]
 simple_cache_macros = "2.1.0-beta"
 simple_cache_core = "1.0.0-beta"
+futures = "0.3.28"
 
 [workspace]
 members = [

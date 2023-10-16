@@ -1,7 +1,9 @@
+extern crate simpl_cache;
+
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
-use simple_cache_macros::ttl_cache;
+use simpl_cache::ttl_cache;
 
 #[ttl_cache(duration_s = 100)]
 fn expensive_build_string(s: &str) -> String {
