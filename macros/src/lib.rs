@@ -31,6 +31,12 @@ pub fn ttl_cache(attr: TokenStream, item: TokenStream) -> TokenStream {
     let function_args = &function.sig.inputs;
     let function_body = &function.block;
     let function_visibitly = &function.vis;
+    let is_async = function.sig.asyncness.is_some();
+    let async_keyword = if is_async {
+        quote! {async}
+    } else {
+        quote! {}
+    };
 
     let key = function_name.to_string();
     let internal_function = Ident::new(&format!("__{}", &key), Span::call_site());
@@ -86,26 +92,33 @@ pub fn ttl_cache(attr: TokenStream, item: TokenStream) -> TokenStream {
     let key = quote! {
         format!("{}:{:?}", #key, (#(#function_arg_values),*))
     };
-    let mut cache_insert = quote! {
-        cache.insert(#key, result.clone());
-    };
-    if only_some && is_option {
-        cache_insert = quote! {
+    let cache_insert = if only_some && is_option {
+        quote! {
             if result.is_some() {
                 cache.insert(#key, result.clone());
             }
-        };
-    }
-    if only_ok && is_result {
-        cache_insert = quote! {
+        }
+    } else if only_ok && is_result {
+        quote! {
             if result.is_ok() {
                 cache.insert(#key, result.clone());
             }
-        };
-    }
+        }
+    } else {
+        quote! {cache.insert(#key, result.clone());}
+    };
+    let call_internal_fn = if is_async {
+        quote! {
+            ::futures::executor::block_on(#internal_function(#(#function_args_names),*))
+        }
+    } else {
+        quote! {
+            #internal_function(#(#function_args_names),*)
+        }
+    };
     // Generate function and ttl cache static variable
     let output = quote! {
-        #function_visibitly fn #function_name(#function_args) -> #function_return_type {
+        #function_visibitly #async_keyword fn #function_name(#function_args) -> #function_return_type {
             // Each ttl cache annotated function will have its own static variable containing
             // an instance of the TtlCache struct, which holds the cached values
             thread_local! {
@@ -113,15 +126,16 @@ pub fn ttl_cache(attr: TokenStream, item: TokenStream) -> TokenStream {
                     ::simple_cache_core::TtlCache::new(::std::time::Duration::from_secs(#duration_s))
                 );
             }
+            #async_keyword fn #internal_function(#function_args) -> #function_return_type {
+                #function_body
+            }
             #static_var.with(|var| {
                 let cache = var.borrow_mut();
                 if let Some(cached_result) = cache.get(#key) {
                     return cached_result;
                 } else {
-                    fn #internal_function(#function_args) -> #function_return_type {
-                        #function_body
-                    }
-                    let result = #internal_function(#(#function_args_names),*);
+
+                    let result = #call_internal_fn;
                     #cache_insert
                     return result;
                 }

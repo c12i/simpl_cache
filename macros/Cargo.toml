@@ -7,7 +7,7 @@ keywords.workspace = true
 repository.workspace = true
 readme.workspace = true
 license.workspace = true
-version = "2.0.0-beta"
+version = "2.1.0-beta"
 
 [lib]
 proc-macro = true
@@ -18,3 +18,4 @@ quote = "1.0.32"
 proc-macro2="1.0.66"
 syn = {version="2.0.28", features=["extra-traits", "full"]}
 simple_cache_core={version = "1.0.0-beta", path="../core"}
+futures = "0.3.28"

@@ -6,7 +6,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-simpl_cache = { version = "2.0.1-beta" }
+simpl_cache = { version = "2.1.0-beta" }
 ```
 
 ## `ttl_cache` macro
@@ -93,6 +93,9 @@ fn main() {
 ```
 
 ## Notes
+Firstly, this is still a work in progress, so I would not advise using this in a production setting.
+
+The macro is not stable for use with struct and enum methods, specifically those with `self` as an arg.
 
 Note that `only_some` and `only_ok` can only be used when the annotated function returns an
 `Option<T>` or `Result<T, E>` respectively. You can also not set both `only_some` and `only_ok`

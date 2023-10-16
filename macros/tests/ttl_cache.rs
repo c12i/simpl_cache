@@ -15,7 +15,7 @@ fn expensive_fallible_build_string(s: &str) -> Result<String, String> {
 }
 
 #[ttl_cache(duration_s = 120, only_some = true)]
-fn expensive_optional_build_string(_s: &str) -> Option<String> {
+async fn expensive_optional_build_string(_s: &str) -> Option<String> {
     None
 }
 
