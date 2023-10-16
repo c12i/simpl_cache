@@ -5,7 +5,7 @@ description = "Simple rust caching tools"
 keywords = ["caching"]
 license = "MIT"
 readme = "./README.md"
-version ="2.2.0-beta"
+version ="2.3.0-beta"
 edition = "2021"
 
 [workspace.package]

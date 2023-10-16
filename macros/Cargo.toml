@@ -7,7 +7,7 @@ keywords.workspace = true
 repository.workspace = true
 readme.workspace = true
 license.workspace = true
-version = "2.2.0-beta"
+version = "2.3.0-beta"
 
 [lib]
 proc-macro = true
