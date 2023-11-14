@@ -129,7 +129,7 @@ pub fn ttl_cache(attr: TokenStream, item: TokenStream) -> TokenStream {
                 #function_body
             }
             #static_var.with(|var| {
-                let cache = var.borrow_mut();
+                let cache = var.borrow();
                 if let Some(cached_result) = cache.get(#key) {
                     return cached_result;
                 } else {
