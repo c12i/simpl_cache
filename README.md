@@ -23,7 +23,7 @@ If the cached value has expired or the function is called with different argumen
 the function will be recomputed and the cache will be updated with the new value.
 
 
-```rust,ignore
+```rust
 use simpl_cache::ttl_cache;
 
 #[ttl_cache(duration_s = 30)]
@@ -44,7 +44,7 @@ fn main() {
 
 You can also cache the `Ok(T)` variant of a function returning a `Result<T, E>`:
 
-```rust,ignore
+```rust
 use simpl_cache::ttl_cache;
 
 // only_ok option ensures that only .is_ok values from the returning Result are cached
@@ -58,18 +58,18 @@ fn some_fallible_function(n: u32) -> Result<u32, String> {
 
 fn main() {
      // zero is not cached since function returns an Err since n == 0
-    println!("last: {}", some_fallible_function(0));
+    println!("last: {:?}", some_fallible_function(0));
     // cache miss: 10 is cached since the result is_ok
-    println!("last: {}", some_fallible_function(10));
+    println!("last: {:?}", some_fallible_function(10));
     // cache hit: 10 is retrieved from the cache
-    println!("last: {}", some_fallible_function(10));
+    println!("last: {:?}", some_fallible_function(10));
 
 }
 ```
 
 Similarly you can also chose to only cache `Some(T)` variants from a function returning an `Option<T>`
 
-```rust,ignore
+```rust
 use simpl_cache::ttl_cache;
 
 // only_some option ensures that only .is_some values from the returning Option are cached
@@ -83,11 +83,11 @@ fn some_optional_function(n: u32) -> Option<u32> {
 
 fn main() {
      // zero is not cached since function returns None since n == 0
-    println!("last: {}", some_optional_function(0));
+    println!("last: {:?}", some_optional_function(0));
     // cache miss: 10 is cached since the result is_some
-    println!("last: {}", some_optional_function(10));
+    println!("last: {:?}", some_optional_function(10));
     // cache hit: 10 is retrieved from the cache
-    println!("last: {}", some_optional_function(10));
+    println!("last: {:?}", some_optional_function(10));
 
 }
 ```
