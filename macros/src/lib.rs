@@ -163,11 +163,8 @@ fn get_function_return_type(output: &ReturnType) -> FunctionReturnType {
                     .last()
                     .map(|segment| segment.ident.to_string());
                 if let Some(s) = type_str {
-                    if s == "Result" {
-                        is_result = true;
-                    } else if s == "Option" {
-                        is_option = true
-                    }
+                    is_option = s == "Option";
+                    is_result = s == "Result";
                 }
             }
             FunctionReturnType {
