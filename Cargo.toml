@@ -18,8 +18,8 @@ readme = "./README.md"
 license = "MIT"
 
 [dependencies]
-simple_cache_macros = {path = "./macros"}
-simple_cache_core = {path = "./core"}
+simple_cache_macros = {version = "2.4.1-beta", path = "./macros"}
+simple_cache_core = {version = "1.0.0-beta", path = "./core"}
 futures = "0.3.28"
 
 [workspace]
