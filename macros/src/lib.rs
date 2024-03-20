@@ -2,6 +2,7 @@ use darling::ast::NestedMeta;
 use darling::{Error, FromMeta};
 use proc_macro::TokenStream;
 use proc_macro2::Span;
+use proc_macro_error::proc_macro_error;
 use quote::quote;
 use syn::punctuated::Punctuated;
 use syn::token::Comma;
@@ -24,6 +25,7 @@ struct FunctionReturnType<'a> {
 /// This proc macro is designed to cache function calls with a
 /// time-to-live (TTL) duration.
 #[proc_macro_attribute]
+#[proc_macro_error]
 pub fn ttl_cache(attr: TokenStream, item: TokenStream) -> TokenStream {
     // Parse the anotated function signature and extract various properties
     let function = parse_macro_input!(item as ItemFn);
@@ -66,21 +68,16 @@ pub fn ttl_cache(attr: TokenStream, item: TokenStream) -> TokenStream {
     let only_ok = only_ok.is_some();
     let only_some = only_some.is_some();
     let function_return_type = ty;
-    if only_ok || only_some {
-        assert_ne!(
-            only_some, only_ok,
-            "`only_some` and `only_ok` cannot both be set"
-        );
+    if only_ok && only_some {
+        proc_macro_error::abort_call_site!("`only_some` and `only_ok` cannot both be set");
     }
-    if only_ok {
-        assert_eq!(
-            only_ok, is_result,
+    if only_ok && !is_result {
+        proc_macro_error::abort_call_site!(
             "`only_ok` can only be applied if the function's return type is a `Result`"
         );
     }
-    if only_some {
-        assert_eq!(
-            only_some, is_option,
+    if only_some && !is_option {
+        proc_macro_error::abort_call_site!(
             "`only_some` can only be applied if the function's return type is an `Option`"
         );
     }
