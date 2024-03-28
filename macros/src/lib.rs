@@ -122,9 +122,7 @@ pub fn ttl_cache(attr: TokenStream, item: TokenStream) -> TokenStream {
                     ::simpl_cache::TtlCache::new(::std::time::Duration::from_secs(#duration_s))
                 );
             }
-            #async_keyword fn #internal_function(#function_args) -> #function_return_type {
-                #function_body
-            }
+            #async_keyword fn #internal_function(#function_args) -> #function_return_type #function_body
             #static_var.with(|var| {
                 let cache = var.borrow();
                 if let Some(cached_result) = cache.get(#key) {
