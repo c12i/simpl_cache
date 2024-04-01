@@ -20,8 +20,7 @@ where
             ttl,
         };
         std::thread::spawn(move || loop {
-            map.clone()
-                .lock()
+            map.lock()
                 .unwrap()
                 .retain(|_, (_, instant)| instant.elapsed() < cache.ttl);
             std::thread::sleep(Duration::from_secs(1));
