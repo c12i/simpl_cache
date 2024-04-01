@@ -148,7 +148,9 @@ fn get_function_return_type(output: &ReturnType) -> FunctionReturnType {
                 // prevent #[ttl_cache] from getting applied to functions that explicitly
                 // return a unit type: `()`
                 if ty.elems.is_empty() {
-                    panic!("`ttl_cache` can only be applied to functions that return a value");
+                    proc_macro_error::abort_call_site!(
+                        "`ttl_cache` can only be applied to functions that return a value"
+                    )
                 }
             }
             if let Type::Path(path) = &**ty {
@@ -169,7 +171,9 @@ fn get_function_return_type(output: &ReturnType) -> FunctionReturnType {
             }
         }
         ReturnType::Default => {
-            panic!("`ttl_cache` can only be applied to functions that return a value")
+            proc_macro_error::abort_call_site!(
+                "`ttl_cache` can only be applied to functions that return a value"
+            )
         }
     }
 }
